@@ -1,0 +1,46 @@
+#include <Servo.h>//舵机所需类的头文件
+/*
+ * 本例结合人体红外感应模块和舵机实现对垃圾桶的自动控制。
+ * 当人接近或离开垃圾桶时，单片机根据信号强度的变化，操作舵机旋转到指度角度，实现垃圾桶的自动开关。
+ * 人体红外感应模块型号为HC-SR501，三条线分别为+5伏,地线和输出信号口，输出信号接A3
+ * 舵机用型号为sg90，本舵机有三条线，红为+5伏，褐色为GND,橙色为信号给，本例接pin9
+ * 本例在arduino nano上实验通过
+*/
+
+Servo myservo;  // 创建舵机对象来控制舵机
+int angle_pos = 0; 
+int pin_sensory= A3;//设置A3接人体感应信号的out口
+
+int value; 
+void setup() 
+{   
+   // 初始化串口通信
+   Serial.begin(9600); 
+   Serial.println("Signal Intensity:");
+   // 把连接在引脚9上的舵机赋予舵机对其控制
+   myservo.attach(9);  
+   pinMode(pin_sensory,INPUT);
+   myservo.write(angle_pos);
+
+} 
+void loop() 
+{ 
+      value= analogRead(pin_sensory); 
+      Serial.println(value);
+      angle_pos=myservo.read(); 
+      if (value>=400)//当值大于400时，舵机转到90度，垃圾桶开盖。
+      //这个值需要自己根据不同距离调整，距离越近，信号越强，经验数据：在距离探头20公分时，强度值约800,人离开后，强度值约40。
+      {
+         myservo.write(90);//舵机转到90度
+         delay(50);
+      }
+
+      else
+      {
+        delay(50);
+        myservo.write(0);//舵机回到0度
+
+      }
+
+        delay(1000);
+}
